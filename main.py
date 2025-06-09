@@ -141,11 +141,11 @@ def import_post():
     return ImportHandler.post()
 
 @app.route('/htmltopdf', methods=['GET'])
-def import_post():
+def import_html_get():
     return HtmlToPdfHandler.get()
 
 @app.route('/htmltopdf', methods=['POST'])
-def import_post():
+def import_html_post():
     return HtmlToPdfHandler.post()
 
 if __name__ == '__main__':
