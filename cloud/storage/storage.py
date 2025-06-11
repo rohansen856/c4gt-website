@@ -222,37 +222,39 @@ def getFile(path):
 ##
 ## path is list, data is a string
 ##
+# In createFile function
 def createFile(path, data):
-    # make sure parent dir exists
     if len(path) <= 1:
-        print("parent path failed");
+        print("path too short")
         return False
+
     ppath = path[:-1]    
-    parentdata = getFileRaw(ppath)
-    if parentdata == None:
-        print("parent data failed"        );
+    parent_data_raw = getFileRaw(ppath)
+    if parent_data_raw == None:
+        print("parent dir does not exist")
         return False
-    # check if file exists
+
+    parentdata = json.loads(parent_data_raw.decode('utf-8'))
+
     spath = pathToString(path)
     if getItem(spath) != None:
-        print("file exists failed"                );
+        print("file exists")
         return False
-    # update the file
+
     filedata = {}
     filedata["data"] = data
     filedata["path"] = path
     filedata["type"] = "file"
     if (not putItem(spath, json.dumps(filedata))):
-        print("putfile failed"                );
+        print("putfile failed")
         return False
-    # the update the directory
+
     fname = path[len(path)-1]
     fileslist = json.loads(parentdata["data"])
     fileslist.append(fname)
     parentdata["data"] = json.dumps(fileslist)    
     if (not putItem(pathToString(ppath), json.dumps(parentdata))):
-        # this is unexpected, unwind !
-        print("putdir failed"                        );
+        print("putdir failed")
         deleteFile(path)
         return False
     return True
