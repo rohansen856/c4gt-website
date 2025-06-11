@@ -204,14 +204,17 @@ def getFile(path):
     print("getfile",data);
     if data == None:
         return None
-    if data["type"] == "dir":
-        fileslist = json.loads(data["data"])
+
+    data_json = json.loads(data.decode('utf-8'))
+
+    if data_json["type"] == "dir":
+        fileslist = json.loads(data_json["data"])
         fname = path[len(path)-1]
         fileobj = Directory(fname, fileslist)
         return fileobj
-    elif data["type"] == "file":
+    elif data_json["type"] == "file":
         fname = path[len(path)-1]
-        fileobj = File(fname, data["data"])
+        fileobj = File(fname, data_json["data"])
         return fileobj
     else:
         return None
