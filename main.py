@@ -16,6 +16,7 @@ from route_handlers.UserSheetHandler import UserSheetHandler
 from route_handlers.DownloadFileHander import DownloadFileHander
 from route_handlers.ImportHandler import ImportHandler
 from route_handlers.HTMLToPDFHandler import HtmlToPdfHandler
+from route_handlers.SEALionHandler import SEALionHandler
 
 # Load environment variables from .env file
 load_dotenv()
@@ -147,6 +148,22 @@ def import_html_get():
 @app.route('/htmltopdf', methods=['POST'])
 def import_html_post():
     return HtmlToPdfHandler.post()
+
+@app.route('/sealion', methods=['GET'])
+def sealion_get():
+    return SEALionHandler.get()
+
+@app.route('/sealion', methods=['POST'])
+def sealion_post():
+    return SEALionHandler.post()
+
+@app.route('/sealion/translate', methods=['POST'])
+def sealion_translate_post():
+    return SEALionHandler.translate_post()
+
+@app.route('/sealion/summarize', methods=['POST'])
+def sealion_summarize_post():
+    return SEALionHandler.summarize_post()
 
 if __name__ == '__main__':
     app.run(debug=True)

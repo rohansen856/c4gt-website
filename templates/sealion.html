@@ -1,0 +1,340 @@
+{% extends "base.html" %}
+
+{% block head %}
+<style>
+.sealion-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.sealion-section {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.sealion-section h3 {
+    margin-top: 0;
+    color: #2c5aa0;
+}
+
+.form-group {
+    margin: 15px 0;
+}
+
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.form-group textarea, .form-group input, .form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: Arial, sans-serif;
+}
+
+.form-group textarea {
+    height: 120px;
+    resize: vertical;
+}
+
+.btn {
+    background: #2c5aa0;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn:hover {
+    background: #1a4480;
+}
+
+.btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.result-box {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 15px;
+    margin-top: 15px;
+    min-height: 100px;
+}
+
+.loading {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+}
+
+.error {
+    background: #ffe6e6;
+    color: #d63031;
+    border: 1px solid #fab1a0;
+    border-radius: 4px;
+    padding: 10px;
+    margin-top: 10px;
+}
+
+.parameter-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 15px;
+    margin: 15px 0;
+}
+
+@media (max-width: 768px) {
+    .parameter-controls {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="sealion-container">
+    <h1>SEALion - Southeast Asian Language Intelligence</h1>
+    <p>Welcome, {{ user.name }}! Use SEALion AI to generate text, translate content, and summarize documents with understanding of Southeast Asian languages and cultural contexts.</p>
+
+    <!-- Text Generation Section -->
+    <div class="sealion-section">
+        <h3>Text Generation</h3>
+        <p>Generate contextually appropriate text for Southeast Asian languages and cultures.</p>
+        
+        <div class="form-group">
+            <label for="generate-prompt">Prompt:</label>
+            <textarea id="generate-prompt" placeholder="Enter your prompt here... (e.g., 'Write a business proposal for a Malaysian tech startup')"></textarea>
+        </div>
+
+        <div class="parameter-controls">
+            <div class="form-group">
+                <label for="max-length">Max Length:</label>
+                <input type="number" id="max-length" value="512" min="100" max="2048">
+            </div>
+            <div class="form-group">
+                <label for="temperature">Temperature:</label>
+                <input type="number" id="temperature" value="0.7" min="0.1" max="1.5" step="0.1">
+            </div>
+            <div class="form-group">
+                <label for="top-p">Top P:</label>
+                <input type="number" id="top-p" value="0.9" min="0.1" max="1.0" step="0.1">
+            </div>
+        </div>
+
+        <button class="btn" onclick="generateText()" id="generate-btn">Generate Text</button>
+        
+        <div id="generate-result" class="result-box" style="display: none;"></div>
+    </div>
+
+    <!-- Translation Section -->
+    <div class="sealion-section">
+        <h3>Translation</h3>
+        <p>Translate text to and from Southeast Asian languages with cultural awareness.</p>
+        
+        <div class="form-group">
+            <label for="translate-text">Text to Translate:</label>
+            <textarea id="translate-text" placeholder="Enter text to translate..."></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="target-language">Target Language:</label>
+            <select id="target-language">
+                <option value="English">English</option>
+                <option value="Bahasa Indonesia">Bahasa Indonesia</option>
+                <option value="Bahasa Malaysia">Bahasa Malaysia</option>
+                <option value="Thai">Thai</option>
+                <option value="Vietnamese">Vietnamese</option>
+                <option value="Tagalog">Tagalog</option>
+                <option value="Mandarin Chinese">Mandarin Chinese</option>
+                <option value="Tamil">Tamil</option>
+            </select>
+        </div>
+
+        <button class="btn" onclick="translateText()" id="translate-btn">Translate</button>
+        
+        <div id="translate-result" class="result-box" style="display: none;"></div>
+    </div>
+
+    <!-- Summarization Section -->
+    <div class="sealion-section">
+        <h3>Text Summarization</h3>
+        <p>Create concise summaries of documents and articles.</p>
+        
+        <div class="form-group">
+            <label for="summarize-text">Text to Summarize:</label>
+            <textarea id="summarize-text" placeholder="Paste the text you want to summarize..."></textarea>
+        </div>
+
+        <button class="btn" onclick="summarizeText()" id="summarize-btn">Summarize</button>
+        
+        <div id="summarize-result" class="result-box" style="display: none;"></div>
+    </div>
+</div>
+
+<script>
+async function generateText() {
+    const prompt = document.getElementById('generate-prompt').value.trim();
+    if (!prompt) {
+        alert('Please enter a prompt');
+        return;
+    }
+
+    const btn = document.getElementById('generate-btn');
+    const resultDiv = document.getElementById('generate-result');
+    
+    btn.disabled = true;
+    btn.textContent = 'Generating...';
+    resultDiv.style.display = 'block';
+    resultDiv.innerHTML = '<div class="loading">Generating text, please wait...</div>';
+
+    try {
+        const response = await fetch('/sealion', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                prompt: prompt,
+                max_length: parseInt(document.getElementById('max-length').value),
+                temperature: parseFloat(document.getElementById('temperature').value),
+                top_p: parseFloat(document.getElementById('top-p').value)
+            })
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+            resultDiv.innerHTML = `
+                <h4>Generated Text:</h4>
+                <p><strong>Model:</strong> ${data.model}</p>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 4px; margin: 10px 0; border-left: 4px solid #2c5aa0;">
+                    ${data.generated_text.replace(/\n/g, '<br>')}
+                </div>
+            `;
+        } else {
+            resultDiv.innerHTML = `<div class="error">Error: ${data.error}</div>`;
+        }
+    } catch (error) {
+        resultDiv.innerHTML = `<div class="error">Network error: ${error.message}</div>`;
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Generate Text';
+}
+
+async function translateText() {
+    const text = document.getElementById('translate-text').value.trim();
+    const targetLanguage = document.getElementById('target-language').value;
+    
+    if (!text) {
+        alert('Please enter text to translate');
+        return;
+    }
+
+    const btn = document.getElementById('translate-btn');
+    const resultDiv = document.getElementById('translate-result');
+    
+    btn.disabled = true;
+    btn.textContent = 'Translating...';
+    resultDiv.style.display = 'block';
+    resultDiv.innerHTML = '<div class="loading">Translating text, please wait...</div>';
+
+    try {
+        const response = await fetch('/sealion/translate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                text: text,
+                target_language: targetLanguage
+            })
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+            resultDiv.innerHTML = `
+                <h4>Translation Result:</h4>
+                <p><strong>Target Language:</strong> ${data.target_language}</p>
+                <p><strong>Model:</strong> ${data.model}</p>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 4px; margin: 10px 0; border-left: 4px solid #28a745;">
+                    <strong>Original:</strong><br>
+                    ${data.original_text.replace(/\n/g, '<br>')}
+                </div>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 4px; margin: 10px 0; border-left: 4px solid #2c5aa0;">
+                    <strong>Translation:</strong><br>
+                    ${data.translated_text.replace(/\n/g, '<br>')}
+                </div>
+            `;
+        } else {
+            resultDiv.innerHTML = `<div class="error">Error: ${data.error}</div>`;
+        }
+    } catch (error) {
+        resultDiv.innerHTML = `<div class="error">Network error: ${error.message}</div>`;
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Translate';
+}
+
+async function summarizeText() {
+    const text = document.getElementById('summarize-text').value.trim();
+    
+    if (!text) {
+        alert('Please enter text to summarize');
+        return;
+    }
+
+    const btn = document.getElementById('summarize-btn');
+    const resultDiv = document.getElementById('summarize-result');
+    
+    btn.disabled = true;
+    btn.textContent = 'Summarizing...';
+    resultDiv.style.display = 'block';
+    resultDiv.innerHTML = '<div class="loading">Creating summary, please wait...</div>';
+
+    try {
+        const response = await fetch('/sealion/summarize', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                text: text
+            })
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+            resultDiv.innerHTML = `
+                <h4>Summary:</h4>
+                <p><strong>Model:</strong> ${data.model}</p>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 4px; margin: 10px 0; border-left: 4px solid #2c5aa0;">
+                    ${data.summary.replace(/\n/g, '<br>')}
+                </div>
+            `;
+        } else {
+            resultDiv.innerHTML = `<div class="error">Error: ${data.error}</div>`;
+        }
+    } catch (error) {
+        resultDiv.innerHTML = `<div class="error">Network error: ${error.message}</div>`;
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Summarize';
+}
+</script>
+{% endblock %}

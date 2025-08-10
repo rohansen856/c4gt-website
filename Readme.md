@@ -182,7 +182,58 @@ To remove volumes as well:
 docker-compose down -v
 ```
 
+## SEALion AI Integration
+
+This application includes integration with SEALion (Southeast Asian Languages in One Network), an open-source family of Large Language Models specifically designed for Southeast Asian contexts.
+
+### SEALion Features
+
+- **Text Generation**: Generate contextually appropriate content with understanding of Southeast Asian languages and cultures
+- **Translation**: Translate text between multiple Southeast Asian languages including:
+  - English, Bahasa Indonesia, Bahasa Malaysia
+  - Thai, Vietnamese, Tagalog, Mandarin Chinese, Tamil
+- **Text Summarization**: Create concise summaries of documents and articles
+
+### Accessing SEALion
+
+1. **Login** to your account
+2. **Navigate** to the SEALion AI link in the user menu
+3. **Use** any of the three main features:
+   - Text Generation with customizable parameters
+   - Translation between supported languages
+   - Document summarization
+
+### SEALion API Endpoints
+
+- `GET /sealion` - Main SEALion interface
+- `POST /sealion` - Text generation API
+- `POST /sealion/translate` - Translation API
+- `POST /sealion/summarize` - Summarization API
+
+### Technical Requirements
+
+SEALion integration requires additional dependencies:
+- `transformers>=4.36.0` - Hugging Face transformers library
+- `torch>=2.2.0` - PyTorch for model inference
+- `accelerate>=0.24.0` - Model acceleration
+- `huggingface_hub>=0.19.0` - Hugging Face model hub
+
+### Model Information
+
+- **Model**: SEALion v3.5 8B parameters
+- **Source**: AI Singapore (aisingapore/llama-sea-lion-v3.5-8b-r)
+- **Specialization**: Southeast Asian languages and cultural contexts
+- **License**: Check model-specific licensing on Hugging Face
+
+### Performance Notes
+
+- First model load may take several minutes depending on hardware
+- Model requires significant GPU memory (8GB+ recommended)
+- CPU inference is supported but will be slower
+- Models are cached locally after first download
+
 ## Additional Notes
 
 - If you encounter any issues during installation or execution, please refer to the official documentation for [Flask](https://flask.palletsprojects.com/) and ensure all prerequisites are correctly installed.
 - For production deployments, change MinIO default credentials and configure proper security settings.
+- SEALion model downloads require stable internet connection and sufficient disk space (15GB+).
