@@ -118,6 +118,71 @@ Before running this Flask application, ensure you have the following installed o
 
 10. Access the application in your web browser at `http://127.0.0.1:5000`.
 
+## Docker Setup (Recommended)
+
+This application now supports Docker with MinIO for local development:
+
+### Prerequisites for Docker
+- Docker
+- Docker Compose
+
+### Docker Setup Instructions
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/ManasMadan/c4gt-website.git
+   cd c4gt-website
+   ```
+
+2. **Configure environment variables**:
+   Create a `.env` file from the example:
+   ```bash
+   cp .env.example .env
+   ```
+
+3. **Start the services**:
+   ```bash
+   docker-compose up -d
+   ```
+
+4. **Access the services**:
+   - **Application**: `http://localhost:5000`
+   - **MinIO Console**: `http://localhost:9001` (admin/admin)
+   - **MinIO API**: `http://localhost:9000`
+
+5. **Create the storage bucket**:
+   - Open MinIO console at `http://localhost:9001`
+   - Login with username: `minioadmin`, password: `minioadmin`
+   - Create a bucket named `c4gt-storage` (or match your `MINIO_BUCKET_NAME` in `.env`)
+
+### MinIO Configuration
+
+This application uses MinIO as an open-source, S3-compatible object storage solution instead of AWS S3:
+
+- **MinIO Server**: Runs on port 9000
+- **MinIO Console**: Web UI on port 9001  
+- **Default Credentials**: minioadmin/minioadmin
+- **Storage**: Local volume `minio_data`
+
+Environment variables for MinIO:
+```env
+MINIO_ENDPOINT=http://minio:9000
+MINIO_ACCESS_KEY=minioadmin
+MINIO_SECRET_KEY=minioadmin
+MINIO_BUCKET_NAME=c4gt-storage
+```
+
+### Stopping the Services
+```bash
+docker-compose down
+```
+
+To remove volumes as well:
+```bash
+docker-compose down -v
+```
+
 ## Additional Notes
 
 - If you encounter any issues during installation or execution, please refer to the official documentation for [Flask](https://flask.palletsprojects.com/) and ensure all prerequisites are correctly installed.
+- For production deployments, change MinIO default credentials and configure proper security settings.

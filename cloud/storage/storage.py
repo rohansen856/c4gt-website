@@ -1,7 +1,7 @@
 """
 Cloud Storage Infrastructure
 
-using amazon S3
+using MinIO (S3-compatible open source storage)
 """
 
 import json
@@ -14,18 +14,22 @@ import os
 # Load environment variables from .env file
 load_dotenv()
 
-# Create S3 client and resource
+# Create MinIO client and resource (S3-compatible)
 s3_client = boto3.client(
     's3',
-    aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
-    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY")
+    endpoint_url=os.getenv("MINIO_ENDPOINT", "http://localhost:9000"),
+    aws_access_key_id=os.getenv("MINIO_ACCESS_KEY"),
+    aws_secret_access_key=os.getenv("MINIO_SECRET_KEY"),
+    region_name='us-east-1'  # MinIO requires a region
 )
 s3_resource = boto3.resource(
     's3',
-    aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
-    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY")
+    endpoint_url=os.getenv("MINIO_ENDPOINT", "http://localhost:9000"),
+    aws_access_key_id=os.getenv("MINIO_ACCESS_KEY"),
+    aws_secret_access_key=os.getenv("MINIO_SECRET_KEY"),
+    region_name='us-east-1'
 )
-AspiringStorageBucket = os.getenv("S3_BUCKET_NAME")
+AspiringStorageBucket = os.getenv("MINIO_BUCKET_NAME")
 
 print("Starting cloud import");
 
