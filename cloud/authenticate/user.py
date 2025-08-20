@@ -12,8 +12,15 @@ userdir = "users"
 userdirpath = ["home",userdir]
 
 def _init_user_directory():
-    if not storage.existsItem('/'.join(userdirpath)):
-        storage.createDir('/'.join(userdirpath))
+    # Create the parent directory first (["home"])
+    parent_path = userdirpath[:-1]  # ["home"]
+    if not storage.existsItem(storage.pathToString(parent_path)):
+        storage.createDir(parent_path)
+        print(f"Created parent directory: {'/'.join(parent_path)}")
+    
+    # Now create the users directory (["home", "users"])
+    if not storage.existsItem(storage.pathToString(userdirpath)):
+        storage.createDir(userdirpath)
         print(f"Created user directory: {'/'.join(userdirpath)}")
 
 _init_user_directory()
